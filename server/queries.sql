@@ -6,7 +6,7 @@ INSERT INTO searchQuery(
     resultKeywords
 )
 
-VALUES {}
+VALUES (%s, %s, %s)
 ;
 
 INSERT INTO video (
@@ -15,28 +15,24 @@ INSERT INTO video (
     videoID,
     keywords,
     experimentSource,
-    recommededVideo,
-    parentRecommended,
-    videoViews,
+    videoViews
 
 )
 
-VALUES {}
+VALUES (%s, %s, %s, %s, %s)
 ;
 
-INSERT INTO keywords (
+INSERT INTO keyword (
 -- 2
     word,
-    cnt,
-    pos, 
-    sentiment
+    cnt
 )
-VALUES {}
+VALUES (%s, %s)
 ;
 
 -- 3
-SELECT word FROM keywords WHERE word = {}
+SELECT word FROM keyword WHERE word = '%s'
 ;
 -- 4
-UPDATE keywords SET cnt = {} WHERE word = {}
+UPDATE keyword SET cnt = %s WHERE word = '%s'
 ;

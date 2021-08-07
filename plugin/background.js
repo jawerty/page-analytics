@@ -76,11 +76,58 @@ const experimentA = () => {
     }
   };
 
-  setInterval(async () => {
+  const searchRoutine = async () => {
     const searchQueryToSave = await youtubeSearch();
+    console.log(`Running new search with query "${searchQueryToSave}"`);
     const postResponse = await postSearchQuery(searchQueryToSave);
-    console.log(postResponse);
-  }, 1000 * 60);
+    console.log("end search", postResponse);
+  };
+  searchRoutine();
+  setInterval(searchRoutine, 1000 * 60);
+
+  // get recommended videos
+  const postVideo = async (videoToSave) => {
+    const data = {
+      ...videoToSave,
+      experimentSource: "A",
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/video", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      return response;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const processMessage = (request) => {
+    return new Promise(async (resolve, reject) => {
+      if (request.eventName === "recommendedContent") {
+        console.log("Got recommended content");
+        const recommendedVideos = request.data.content;
+        for (let recommendedVideo of recommendedVideos) {
+          const response = await postVideo(recommendedVideo);
+          console.log(response);
+        }
+        resolve(true);
+      }
+    });
+  };
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
+    processMessage(request).then((response) => {
+      sendResponse(response);
+    });
+    return true;
+  });
 };
 
 (function main() {
