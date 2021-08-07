@@ -132,7 +132,6 @@ const experimentA = () => {
                 let recommendedVideosByDetails = document.querySelectorAll(
                   "#content ytd-rich-item-renderer #details"
                 );
-                recommendedVideosByDetails = [recommendedVideosByDetails[0]];
                 const recommendedVideos = [];
                 for (const recommendedVideo of recommendedVideosByDetails) {
                   const creatorName =
