@@ -1,10 +1,9 @@
-from mysql.connector import conn
-from sqlCreds import SQL_Credentials
+import mysql.connector as connection
+from .sqlCreds import SQL_Credentials
 
 class SQL_Cli:
 
     def __init__(self, db: str):
-
         self.credentials = SQL_Credentials()
         self.credentials.authenticate(db=db)
         self.__db = self.sqlConnect(db=db)
@@ -15,31 +14,35 @@ class SQL_Cli:
 
     def sqlConnect(self, db: str) -> object:
 
-        return conn.connect(
+        return connection.connect(
 
-                host = credentials.auth['host'],
-                user = credentials.auth['user'],
-                password = credentials.auth['password'],
-                database = credentials.auth['database']
+                host = self.credentials.auth['host'],
+                user = self.credentials.auth['user'],
+                password = self.credentials.auth['password'],
+                database = self.credentials.auth['database']
             )
 
     def execute(self, query: str,
+                      data: tuple,
                       bulkInfo: list = None, 
                       commit: bool = False, 
                       read: bool = False) -> list:
         
-        data = []
+        result = []
         cursor=self.db.cursor()
         if bulkInfo:
             cursor.excutemany(query, bulkInfo)
         else:
-            cursor.execute(query)
+            print("begin")
+            print(query, data)
+            print("end")
+            cursor.execute(query, data)
         if commit:
             self.db.commit()
         if read:
-            data = cursor.fetchall()
+            result = cursor.fetchall()
         cursor.close()
-        return data
+        return result
 
     def commit(self):
         self.db.commit() 

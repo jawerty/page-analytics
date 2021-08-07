@@ -1,10 +1,10 @@
-import config as cfg
+from .config import sql_credentials
 
 class SQL_Credentials:
 
     def __init__(self):
 
-        self.creds = cfg.sql_credentials()
+        self.creds = sql_credentials()
         self.auth = {
 
             'host': 'localhost',
