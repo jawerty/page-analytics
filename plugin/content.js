@@ -156,60 +156,9 @@ const youtubeExperiment = () => {
           });
         }
 
-<<<<<<< HEAD
-        (async function main(pageToWaitFor) {
-          if (pageToWaitFor == "home") {
-            await waitForHomepage(); // wait for content to render
-          }
-          if (isHomepage()) {
-            function getRecommendedVideos() {
-              return new Promise(async (resolve) => {
-                let recommendedVideosByDetails = document.querySelectorAll(
-                  "#content ytd-rich-item-renderer #details"
-                );
-                recommendedVideosByDetails = [recommendedVideosByDetails[0]];
-                const recommendedVideos = [];
-                for (const recommendedVideo of recommendedVideosByDetails) {
-                  const creatorName =
-                    recommendedVideo.querySelector("#avatar-link").title;
-                  const titleLinkEl =
-                    recommendedVideo.querySelector("#video-title-link");
-                  const titleLink = titleLinkEl.href;
-                  const videoID = titleLink.split("?v=")[1];
-                  const videoURL = titleLink;
-
-                  let results = {};
-                  try {
-                    results = await getVideoPageInfo(videoURL);
-                  } catch (e) {
-                    console.log(e);
-                  }
-                  const recommendedVideoObject = {
-                    creatorName,
-                    title: titleLinkEl.innerText,
-                    videoURL,
-                    videoID,
-                    recommededVideo: true,
-                    ...results,
-                  };
-
-                  recommendedVideos.push(recommendedVideoObject);
-                }
-
-                resolve(recommendedVideos);
-              });
-            }
-
-            const recommendedVideos = await getRecommendedVideos();
-            console.log(recommendedVideos);
-            sendRecommendedVideos(recommendedVideos);
-          }
-        })();
-=======
         const recommendedVideos = await getRecommendedVideos();
         console.log(recommendedVideos);
         sendRecommendedVideos(recommendedVideos);
->>>>>>> 9fe5d27... abstract running experiments
       }
     })();
   }
