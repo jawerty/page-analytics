@@ -10,13 +10,13 @@ const youtubeExperiment = () => {
       return !!content;
     }
 
-    function sendRecommendedVideos(recommendedVideos) {
+    function sendRecommendedVideo(recommendedVideo) {
       chrome.runtime.sendMessage(
         {
           eventName: "recommendedContent",
           data: {
             origin: "youtube",
-            content: recommendedVideos,
+            content: recommendedVideo,
           },
         },
         (response) => {
@@ -119,46 +119,44 @@ const youtubeExperiment = () => {
         await waitForHomepage(); // wait for content to render
       }
       if (isHomepage()) {
-        function getRecommendedVideos() {
+        function getAndSendRecommendedVideos() {
           return new Promise(async (resolve) => {
             let recommendedVideosByDetails = document.querySelectorAll(
               "#content ytd-rich-item-renderer #details"
             );
             const recommendedVideos = [];
             for (const recommendedVideo of recommendedVideosByDetails) {
-              const creatorName =
-                recommendedVideo.querySelector("#avatar-link").title;
-              const titleLinkEl =
-                recommendedVideo.querySelector("#video-title-link");
-              const titleLink = titleLinkEl.href;
-              const videoID = titleLink.split("?v=")[1];
-              const videoURL = titleLink;
-
-              let results = {};
               try {
-                results = await getVideoPageInfo(videoURL);
+                const creatorName =
+                  recommendedVideo.querySelector("#avatar-link").title;
+                const titleLinkEl =
+                  recommendedVideo.querySelector("#video-title-link");
+                const titleLink = titleLinkEl.href;
+                const videoID = titleLink.split("?v=")[1];
+                const videoURL = titleLink;
+
+                const results = await getVideoPageInfo(videoURL);
+                if (results.keywords) {
+                  const recommendedVideoObject = {
+                    creatorName,
+                    title: titleLinkEl.innerText,
+                    videoURL,
+                    videoID,
+                    recommededVideo: true,
+                    ...results,
+                  };
+                  sendRecommendedVideo(recommendedVideoObject);
+                }
               } catch (e) {
                 console.log(e);
               }
-              const recommendedVideoObject = {
-                creatorName,
-                title: titleLinkEl.innerText,
-                videoURL,
-                videoID,
-                recommededVideo: true,
-                ...results,
-              };
-
-              recommendedVideos.push(recommendedVideoObject);
             }
 
             resolve(recommendedVideos);
           });
         }
 
-        const recommendedVideos = await getRecommendedVideos();
-        console.log(recommendedVideos);
-        sendRecommendedVideos(recommendedVideos);
+        const recommendedVideos = await getAndSendRecommendedVideos();
       }
     })();
   }

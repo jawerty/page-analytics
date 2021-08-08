@@ -79,6 +79,7 @@ const youtubeExperiment = (experimentName, searchQueries) => {
     );
     console.log("end search", postResponse);
   };
+
   searchRoutine();
   setInterval(searchRoutine, 1000 * 60);
 
@@ -86,11 +87,9 @@ const youtubeExperiment = (experimentName, searchQueries) => {
     return new Promise(async (resolve, reject) => {
       if (request.eventName === "recommendedContent") {
         console.log("Got recommended content");
-        const recommendedVideos = request.data.content;
-        for (let recommendedVideo of recommendedVideos) {
-          const response = await postVideo(experimentName, recommendedVideo);
-          console.log(response);
-        }
+        const recommendedVideo = request.data.content;
+        const response = await postVideo(experimentName, recommendedVideo);
+        console.log(response);
         resolve(true);
       }
     });
