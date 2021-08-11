@@ -20,10 +20,7 @@ def video():
         ORM.insertKeywords(data=content['keywords'])
         result = True
     except:
-        print("Whew!", sys.exc_info(), "occurred.")
-
         result = False
-    print(result)
 
     return jsonify({'result': result}) 
 

@@ -153,7 +153,7 @@ const youtubeExperiment = () => {
           });
         }
 
-        const recommendedVideos = await getAndSendRecommendedVideos();
+        getAndSendRecommendedVideos();
       }
     })();
   }
