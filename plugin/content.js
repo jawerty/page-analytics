@@ -63,8 +63,6 @@ const youtubeExperiment = () => {
             doc.open();
             doc.write(text);
             doc.close();
-            console.log(doc);
-
             const scripts = doc.evaluate(
               '//script[contains(text(),"ytInitialData")]',
               doc.body,
@@ -80,7 +78,6 @@ const youtubeExperiment = () => {
               .split("var ytInitialData = ")[1]
               .trim();
 
-            console.log(unparsedJSON);
             const ytData = JSON.parse(
               unparsedJSON.substring(0, unparsedJSON.length - 1)
             );

@@ -81,7 +81,7 @@ const youtubeExperiment = (experimentName, searchQueries) => {
   };
 
   searchRoutine();
-  setInterval(searchRoutine, 1000 * 60);
+  setInterval(searchRoutine, 1000 * 60 * 10);
 
   const processMessage = (request) => {
     return new Promise(async (resolve, reject) => {
