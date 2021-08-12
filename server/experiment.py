@@ -39,5 +39,5 @@ class Experiment():
         thread1.join()
         thread2.join()
 
-e = Experiment('A')
+e = Experiment(sys.argv[1])
 e.run()
