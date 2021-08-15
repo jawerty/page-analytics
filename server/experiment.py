@@ -9,6 +9,8 @@ from selenium import webdriver
 from browser_interaction_bot import BrowserInteractionBot
 from recommended_content_bot import RecommendedContentBot
 from selenium_tools import SeleniumTools
+from selenium.webdriver.chrome.options import Options
+from fake_useragent import UserAgent
 
 class Experiment():
     def __init__(self, experimentName):
@@ -21,8 +23,12 @@ class Experiment():
             sys.exit()
 
         try:
-
-            self.driver = webdriver.Chrome("/Users/finchmf/webdriver/chromedriver")
+            options = Options()
+            # ua = UserAgent()
+            # userAgent = ua.random
+            # print(userAgent)
+            # options.add_argument(f'user-agent={userAgent}')
+            self.driver = webdriver.Chrome(options=options, executable_path="./chromedriver_v92")
             # atexit.register(self.exit_handler)
 
         except:

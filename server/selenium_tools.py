@@ -14,7 +14,7 @@ class SeleniumTools():
         
     def waitForCssSelector(self, endpoint: str):
         try:
-            response = WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f'{endpoint}')))
+            # response = WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f'{endpoint}')))
             result = True
         except:
             result = False

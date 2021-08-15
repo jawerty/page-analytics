@@ -10,4 +10,4 @@ class RecommendedContentBot():
 
     def run(self):
         print("Fetching recommended content")
-        self.seleniumTools.createNewTab(url="http://youtube.com")
+        # self.seleniumTools.createNewTab(url="http://youtube.com")

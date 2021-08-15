@@ -16,4 +16,5 @@ class BrowserInteractionBot():
     def run(self):
         print("Automating browser interactions")
         self.seleniumTools.createNewTab(self.buildSearchUrl())
-        # self.seleniumTools.waitForYoutubeSearchResults()
+        self.seleniumTools.waitForCssSelector('.ytd-video-renderer')
+        print("got it")
