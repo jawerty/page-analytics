@@ -42,15 +42,15 @@ class Experiment():
         self.seleniumTools = SeleniumTools(self.driver)
         self.browseBot = BrowserInteractionBot(self.config, self.seleniumTools)
         self.recBot = RecommendedContentBot(self.config, self.seleniumTools)
-        thread1 = Thread(target=self.browseBot.run)
+        # thread1 = Thread(target=self.browseBot.run)
         thread2 = Thread(target=self.recBot.run)
 
         # run the two threads
-        thread1.start() 
+        # thread1.start() 
         thread2.start()
 
         # join threads with main thread to merge execution on completion
-        thread1.join()
+        # thread1.join()
         thread2.join()
 
 e = Experiment(sys.argv[1]) 
