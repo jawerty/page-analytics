@@ -19,7 +19,7 @@ class Experiment():
             sys.exit()
 
         try:
-            self.driver = webdriver.Chrome("./chromedriver_v92")
+            self.driver = webdriver.Chrome("/Users/finchmf/webdriver/chromedriver")
         except:
             print("Couldn't connect selenium driver", sys.exc_info())
             sys.exit()
