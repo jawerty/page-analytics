@@ -12,7 +12,11 @@ class SeleniumTools():
         newTab = self.driver.window_handles[newTabIndex]
         self.driver.switch_to_window(newTab)
         
-    def waitForYoutubeSearchResults(self):
-        print("waiting")
-        response = WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.CLASS_NAME, "yt-simple-endpoint")))
-        print("got it")
+    def waitForCssSelector(self, endpoint: str):
+        try:
+            response = WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f'{endpoint}')))
+            result = True
+        except:
+            result = False
+
+        return result
