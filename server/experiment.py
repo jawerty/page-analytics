@@ -1,4 +1,6 @@
 #!/usr/bin/python
+import atexit
+
 import sys
 import json
 from threading import Thread
@@ -19,11 +21,17 @@ class Experiment():
             sys.exit()
 
         try:
+
             self.driver = webdriver.Chrome("/Users/finchmf/webdriver/chromedriver")
+            # atexit.register(self.exit_handler)
+
         except:
             print("Couldn't connect selenium driver", sys.exc_info())
             sys.exit()
-        
+    
+    def exit_handler(self):
+        self.driver.quit()
+
     def run(self):
         self.seleniumTools = SeleniumTools(self.driver)
         self.browseBot = BrowserInteractionBot(self.config, self.seleniumTools)
@@ -39,5 +47,5 @@ class Experiment():
         thread1.join()
         thread2.join()
 
-e = Experiment(sys.argv[1])
+e = Experiment(sys.argv[1]) 
 e.run()
