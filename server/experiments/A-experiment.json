@@ -25,13 +25,13 @@
     "animation stop motion tim burton"
   ],
   "frequency": 600,
-  "clickVideo": false,
-  "likeType": null,
+  "clickVideo": true,
+  "likeType": 1,
   "comment": null,
-  "subscribe": false,
+  "subscribe": true,
   "paid": false,
   "related": null,
   "report": false,
-  "username": null,
-  "password": null
+  "username": "test.person989",
+  "password": "testperson123"
 }
