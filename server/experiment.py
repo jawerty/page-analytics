@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import atexit
-
+import time
 import sys
 import json
 from threading import Thread
@@ -12,6 +12,8 @@ from selenium_tools import SeleniumTools
 
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 # from fake_useragent import UserAgent
+
+import _globals
 
 class Experiment():
     def __init__(self, experimentName):
@@ -46,15 +48,19 @@ class Experiment():
         self.browseBot = BrowserInteractionBot(self.config, self.seleniumTools)
         self.recBot = RecommendedContentBot(self.config, self.seleniumTools)
         thread1 = Thread(target=self.browseBot.run)
-        # thread2 = Thread(target=self.recBot.run)
+        thread2 = Thread(target=self.recBot.run)
 
         # run the two threads
         thread1.start() 
-        # thread2.start()
+        thread2.start()
 
         # join threads with main thread to merge execution on completion
         thread1.join()
-        # thread2.join()
+        thread2.join()
+        
+        
 
-e = Experiment(sys.argv[1]) 
-e.run()
+if __name__ == "__main__":
+    _globals.init()
+    e = Experiment(sys.argv[1]) 
+    e.run()

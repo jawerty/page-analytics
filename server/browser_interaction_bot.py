@@ -1,6 +1,8 @@
 import sys
 import random
 import time
+import threading
+import _globals
 
 class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
@@ -114,9 +116,110 @@ class BrowserInteractionBot():
         
         return result
 
-    def run(self):
-        self.seleniumTools.createNewTab("data:;")
+    def getPositiveComment(self):
+        return "I like this video!"
 
+    def getNegativeComment(self):
+        return "I don't like this video!"
+
+    def comment(self):
+        result = False
+        username = self.config['username']
+        password = self.config['password']
+        commentType = self.config['comment']
+        if commentType is not None:
+            if username is None or password is None:
+                print("You cannot comment without a username/password set")
+                return result
+
+            if commentType == 1:
+                comment = self.getPositiveComment()
+            elif commentType == 0:
+                comment = self.getNegativeComment()
+            else:
+                return result
+            try:
+                # first check if page has commenting turned off
+                message = self.seleniumTools.driver.find_element_by_css_selector("#message")
+                if message:
+                    if "Comments are turned off" in message.text:
+                        print("Commenting is turned off in this video")
+                        return result
+
+                # need to scroll down page to open commenting
+                if not self.scrolled:
+                    self.seleniumTools.driver.execute_script("window.scrollTo(0, 500)") 
+                    self.scrolled = True
+
+                textareaSelector = "#placeholder-area.ytd-comment-simplebox-renderer"
+                self.seleniumTools.waitForCssSelector(endpoint=textareaSelector, visibility=True)
+                textarea = self.seleniumTools.driver.find_element_by_css_selector(textareaSelector)
+                textarea.click()
+                time.sleep(0.5)
+                textarea_content = self.seleniumTools.driver.find_element_by_css_selector("#contenteditable-textarea [contenteditable=true]")
+                textarea_content.send_keys(comment)
+
+                submitButton = self.seleniumTools.driver.find_element_by_css_selector("#submit-button #button")
+                submitButton.click()
+                time.sleep(1)
+                print("Commenting successful")
+                result = True
+            except:
+                print("Commenting routine did not work: ", sys.exc_info())
+
+        return result
+
+    def report(self):
+        result = False
+        username = self.config['username']
+        password = self.config['password']
+        report = self.config['report']
+        if report:
+            if username and password:
+                moreButtonSelector = "ytd-menu-renderer > yt-icon-button#button"
+                self.seleniumTools.waitForCssSelector(endpoint=moreButtonSelector, visibility=True)
+                moreButton = self.seleniumTools.driver.find_element_by_css_selector(moreButtonSelector)
+                moreButton.click()
+                time.sleep(0.5)
+                reportButton = self.seleniumTools.driver.find_element_by_xpath("//ytd-menu-service-item-renderer[contains(text(), 'Report')]")
+                reportButton.click()
+                # just opens modal for now 
+                # todo to complete form and actually report
+                result = True
+            else:
+                print("You cannot report without a username/password set")
+
+        return result
+
+    def related(self):
+        result = False
+        related = self.config['related']
+        if related is not None:
+            def clickRelatedRoutine(i):
+                print("clicking video", i+1, "of", related)
+                print("waiting for section")
+                watchNextSectionSelector = "#items.ytd-watch-next-secondary-results-renderer"
+                self.seleniumTools.waitForCssSelector(endpoint=watchNextSectionSelector, visibility=True)
+                firstVideoLinkSelector = "#items.ytd-watch-next-secondary-results-renderer a.yt-simple-endpoint:first-of-type"
+                firstVideoLink = self.seleniumTools.driver.find_element_by_css_selector(firstVideoLinkSelector)
+                
+                oldPage = self.seleniumTools.driver.find_element_by_tag_name('html')
+                print("clicking video link", firstVideoLink)
+                firstVideoLink.click()
+                time.sleep(1) # some buffer time before reruning
+                # Check if new page loaded (page wont change if login fails)
+                if i < related-1:
+                    return clickRelatedRoutine(i+1)
+                else:
+                    print("Related video clicking finished")
+                    return True
+            try:
+                result = clickRelatedRoutine(0)
+            except:
+                print("Related video routine did not work: ", sys.exc_info())
+
+        return result
+    def routine(self):
         print("Automating browser interactions")
         if not self.signIn(): # if username and password set else be anon user
             sys.exit()
@@ -133,3 +236,28 @@ class BrowserInteractionBot():
         # subscribe
         self.subscribe()
        
+        # comment
+        self.comment()
+
+        # report
+        self.report()
+
+        # related
+        self.related()
+
+        print("Browser interactions finished") 
+    
+    def run(self):
+        frequency = self.config["frequency"]   
+        def runTimer(): 
+            if _globals.lockProcess:
+               while _globals.lockProcess:
+                   time.sleep(1)
+                   print("Browser interactions waiting for unlocking") 
+            
+            _globals.lockProcess = True
+            threading.Timer(frequency, runTimer).start()        
+            self.routine() #runs immediately as well
+            _globals.lockProcess = False
+
+        runTimer()
