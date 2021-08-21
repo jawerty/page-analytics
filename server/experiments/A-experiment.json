@@ -24,14 +24,14 @@
     "nightmare before christmas jack",
     "animation stop motion tim burton"
   ],
-  "frequency": 600,
+  "frequency": 60,
   "clickVideo": true,
-  "likeType": 1,
+  "likeType": null,
   "comment": null,
-  "subscribe": true,
+  "subscribe": false,
   "paid": false,
-  "related": null,
+  "related": 3,
   "report": false,
-  "username": "test.person989",
-  "password": "testperson123"
+  "username": null,
+  "password": null
 }
