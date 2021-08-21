@@ -50,7 +50,7 @@ class Experiment():
         thread1 = Thread(target=self.browseBot.run)
         thread2 = Thread(target=self.recBot.run)
 
-        # run the two threads
+        # run the two threads        
         thread1.start() 
         thread2.start()
 
