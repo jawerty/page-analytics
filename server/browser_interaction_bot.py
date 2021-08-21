@@ -8,7 +8,6 @@ class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
         self.config = config
         self.seleniumTools = seleniumTools
-        self.scrolled = False
 
     def getRandomTopic(self):
         print(random.choice(self.config['topics']))
@@ -23,10 +22,10 @@ class BrowserInteractionBot():
         if self.config['clickVideo']:
             oldPage = self.seleniumTools.driver.find_element_by_tag_name('html')
             element.click()
-            print("Clicked new page")
+            print("clicked new page")
         else:
             self.seleniumTools.driver.get(element.get_attribute('href'))
-            print("Went to new page (without clicking)")
+            print("go to new page")
 
     def likeVideo(self):
         likeType = self.config['likeType']
@@ -36,41 +35,28 @@ class BrowserInteractionBot():
                 print('waiting')
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 likeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:first-of-type")
-                
-                if 'style-default-active' in likeButton.get_attribute('class').split():
-                    print('Video already liked!')
-                else:
-                    likeButton.click()
-                    print("Video liked")
+                print(likeButton)
+                likeButton.click()
+                print("liked it")
                 result = True
             elif likeType == 0:
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 dislikeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:last-of-type")
-                if 'style-default-active' in dislikeButton.get_attribute('class').split():
-                    print('Video already disliked!')
-                else:
-                    dislikeButton.click()
-                    print("Video disliked")
+                dislikeButton.click()
                 result = True
             else:
                 # likeVideo is null
                 result = True
         except:
-            print("Liking video routine failed", sys.exc_info())
+            print("liking video routine failed", sys.exc_info())
             result = False
 
         return result
 
     def subscribe(self):
-        result = False
         subscribe = self.config['subscribe']
-        if subscribe: # has to be user
-            username = self.config['username'] 
-            password = self.config['password'] 
-            if username is not None or password is not None:
-                print("You must set username and password to subscribe")
-                return result
-           
+        print(self.config['username'], self.config['password'], subscribe)
+        if self.config['username'] and self.config['password'] and subscribe: # has to be user
             print("subscribing")
             try:  
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
@@ -83,8 +69,7 @@ class BrowserInteractionBot():
                     print("User already subscribed")
                     result = False
             except:
-                print("Subscribing to video routine failed", sys.exc_info())
-        
+                print("subscribing to video routine failed", sys.exc_info())
         else:
             result = False
 
@@ -173,72 +158,6 @@ class BrowserInteractionBot():
                 time.sleep(0.5)
                 textarea_content = self.seleniumTools.driver.find_element_by_css_selector("#contenteditable-textarea [contenteditable=true]")
                 textarea_content.send_keys(comment)
-<<<<<<< HEAD
-=======
-
-                submitButton = self.seleniumTools.driver.find_element_by_css_selector("#submit-button #button")
-                submitButton.click()
-                time.sleep(1)
-                print("Commenting successful")
-                result = True
-            except:
-                print("Commenting routine did not work: ", sys.exc_info())
-
-        return result
-
-    def report(self):
-        result = False
-        username = self.config['username']
-        password = self.config['password']
-        report = self.config['report']
-        if report:
-            if username and password:
-                moreButtonSelector = "ytd-menu-renderer > yt-icon-button#button"
-                self.seleniumTools.waitForCssSelector(endpoint=moreButtonSelector, visibility=True)
-                moreButton = self.seleniumTools.driver.find_element_by_css_selector(moreButtonSelector)
-                moreButton.click()
-                time.sleep(0.5)
-                reportButton = self.seleniumTools.driver.find_element_by_xpath("//ytd-menu-service-item-renderer[contains(text(), 'Report')]")
-                reportButton.click()
-                # just opens modal for now 
-                # todo to complete form and actually report
-                result = True
-            else:
-                print("You cannot report without a username/password set")
-
-        return result
-
-    def related(self):
-        result = False
-        related = self.config['related']
-        if related is not None:
-            def clickRelatedRoutine(i):
-                print("clicking video", i+1, "of", related)
-                print("waiting for section")
-                watchNextSectionSelector = "#items.ytd-watch-next-secondary-results-renderer"
-                self.seleniumTools.waitForCssSelector(endpoint=watchNextSectionSelector, visibility=True)
-                firstVideoLinkSelector = "#items.ytd-watch-next-secondary-results-renderer a.yt-simple-endpoint:first-of-type"
-                firstVideoLink = self.seleniumTools.driver.find_element_by_css_selector(firstVideoLinkSelector)
-                
-                oldPage = self.seleniumTools.driver.find_element_by_tag_name('html')
-                print("clicking video link", firstVideoLink)
-                firstVideoLink.click()
-                time.sleep(1) # some buffer time before reruning
-                # Check if new page loaded (page wont change if login fails)
-                if i < related-1:
-                    return clickRelatedRoutine(i+1)
-                else:
-                    print("Related video clicking finished")
-                    return True
-            try:
-                result = clickRelatedRoutine(0)
-            except:
-                print("Related video routine did not work: ", sys.exc_info())
-
-        return result
-    def routine(self):
-        self.seleniumTools.createNewTab("data:;")
->>>>>>> ceb175ef84eefee7ec00aed3d48ffa9528a6236f
 
                 submitButton = self.seleniumTools.driver.find_element_by_css_selector("#submit-button #button")
                 submitButton.click()
@@ -302,7 +221,7 @@ class BrowserInteractionBot():
         return result
     def routine(self):
         print("Automating browser interactions")
-        if not self.signIn(): # if username and password set and successfully logged in else be anon user
+        if not self.signIn(): # if username and password set else be anon user
             sys.exit()
 
         self.seleniumTools.driver.get(self.buildSearchUrl())
@@ -331,7 +250,6 @@ class BrowserInteractionBot():
     def run(self):
         frequency = self.config["frequency"]   
         def runTimer(): 
-<<<<<<< HEAD
             if _globals.lockProcess:
                while _globals.lockProcess:
                    time.sleep(1)
@@ -343,9 +261,3 @@ class BrowserInteractionBot():
             _globals.lockProcess = False
 
         runTimer()
-=======
-            threading.Timer(frequency, runTimer).start()        
-            self.routine() #runs immediately as well
-
-        runTimer()
->>>>>>> ceb175ef84eefee7ec00aed3d48ffa9528a6236f
