@@ -11,7 +11,7 @@ class BrowserInteractionBot():
         self.seleniumTools = seleniumTools
 
     def getRandomTopic(self):
-        print(random.choice(self.config['topics']))
+        print("Using topic", random.choice(self.config['topics']))
         return random.choice(self.config['topics'])
 
     def buildSearchUrl(self):
