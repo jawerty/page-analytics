@@ -12,5 +12,5 @@ def runJob(frequency: int, callback: Callable, waitingMessage: str = None, ):
     
     _globals.lockProcess = True
     threading.Timer(frequency, runJob).start()        
-    cb() #runs immediately as well
+    callback() #runs immediately as well
     _globals.lockProcess = False
