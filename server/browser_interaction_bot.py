@@ -3,7 +3,7 @@ import random
 import time
 import threading
 import _globals
-from utils import runTimer
+from utils import runJob
 
 class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
@@ -250,7 +250,7 @@ class BrowserInteractionBot():
     
     def run(self):
         frequency = self.config["frequency"]   
-        runTimer(
+        runJob(
             frequency=frequency, 
             waitingMessage="Browser Interactions Bot waiting...", 
             callback=self.routine

@@ -7,7 +7,7 @@ import requests
 import threading
 import _globals
 import time
-from utils import runTimer
+from utils import runJob
 
 class RecommendedContentBot():
     def __init__(self, config, seleniumTools):
@@ -50,7 +50,7 @@ class RecommendedContentBot():
         
     def run(self):
         frequency = 600 
-        runTimer(
+        runJob(
             frequency=frequency, 
             waitingMessage="Recommended bot waiting...", 
             callback=self.routine

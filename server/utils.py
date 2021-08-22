@@ -3,7 +3,7 @@ import threading
 import _globals
 from typing import Callable
 
-def runTimer(frequency: int, callback: Callable, waitingMessage: str = None, ): 
+def runJob(frequency: int, callback: Callable, waitingMessage: str = None, ): 
     if _globals.lockProcess:
         while _globals.lockProcess:
             time.sleep(1)
@@ -11,6 +11,6 @@ def runTimer(frequency: int, callback: Callable, waitingMessage: str = None, ):
                 print(waitingMessage) 
     
     _globals.lockProcess = True
-    threading.Timer(frequency, runTimer).start()        
+    threading.Timer(frequency, runJob).start()        
     cb() #runs immediately as well
     _globals.lockProcess = False
