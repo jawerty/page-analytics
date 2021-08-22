@@ -7,6 +7,7 @@ import requests
 import threading
 import _globals
 import time
+from utils import runTimer
 
 class RecommendedContentBot():
     def __init__(self, config, seleniumTools):
@@ -49,15 +50,8 @@ class RecommendedContentBot():
         
     def run(self):
         frequency = 600 
-        def runTimer(): 
-            if _globals.lockProcess:
-               while _globals.lockProcess:
-                   time.sleep(1)
-                   print("Recommended bot waiting for unlocking") 
-            
-            _globals.lockProcess = True
-            threading.Timer(frequency, runTimer).start() # runs recursively in x amount of time (make sure frequency is comfortably longer than process takes)    
-            self.routine() # run routine
-            _globals.lockProcess = False
-
-        runTimer()
+        runTimer(
+            frequency=frequency, 
+            waitingMessage="Recommended bot waiting...", 
+            callback=self.routine
+        )

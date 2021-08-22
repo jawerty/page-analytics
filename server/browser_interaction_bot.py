@@ -3,6 +3,7 @@ import random
 import time
 import threading
 import _globals
+from utils import runTimer
 
 class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
@@ -249,15 +250,8 @@ class BrowserInteractionBot():
     
     def run(self):
         frequency = self.config["frequency"]   
-        def runTimer(): 
-            if _globals.lockProcess:
-               while _globals.lockProcess:
-                   time.sleep(1)
-                   print("Browser interactions waiting for unlocking") 
-            
-            _globals.lockProcess = True
-            threading.Timer(frequency, runTimer).start()        
-            self.routine() #runs immediately as well
-            _globals.lockProcess = False
-
-        runTimer()
+        runTimer(
+            frequency=frequency, 
+            waitingMessage="Browser Interactions Bot waiting...", 
+            callback=self.routine
+        )
