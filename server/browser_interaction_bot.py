@@ -2,15 +2,16 @@ import sys
 import random
 import time
 import threading
+import _globals
+from utils import runJob
 
 class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
         self.config = config
         self.seleniumTools = seleniumTools
-        self.scrolled = False
 
     def getRandomTopic(self):
-        print(random.choice(self.config['topics']))
+        print("Using topic", random.choice(self.config['topics']))
         return random.choice(self.config['topics'])
 
     def buildSearchUrl(self):
@@ -22,10 +23,10 @@ class BrowserInteractionBot():
         if self.config['clickVideo']:
             oldPage = self.seleniumTools.driver.find_element_by_tag_name('html')
             element.click()
-            print("Clicked new page")
+            print("clicked new page")
         else:
             self.seleniumTools.driver.get(element.get_attribute('href'))
-            print("Went to new page (without clicking)")
+            print("go to new page")
 
     def likeVideo(self):
         likeType = self.config['likeType']
@@ -35,41 +36,28 @@ class BrowserInteractionBot():
                 print('waiting')
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 likeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:first-of-type")
-                
-                if 'style-default-active' in likeButton.get_attribute('class').split():
-                    print('Video already liked!')
-                else:
-                    likeButton.click()
-                    print("Video liked")
+                print(likeButton)
+                likeButton.click()
+                print("liked it")
                 result = True
             elif likeType == 0:
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 dislikeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:last-of-type")
-                if 'style-default-active' in dislikeButton.get_attribute('class').split():
-                    print('Video already disliked!')
-                else:
-                    dislikeButton.click()
-                    print("Video disliked")
+                dislikeButton.click()
                 result = True
             else:
                 # likeVideo is null
                 result = True
         except:
-            print("Liking video routine failed", sys.exc_info())
+            print("liking video routine failed", sys.exc_info())
             result = False
 
         return result
 
     def subscribe(self):
-        result = False
         subscribe = self.config['subscribe']
-        if subscribe: # has to be user
-            username = self.config['username'] 
-            password = self.config['password'] 
-            if username is not None or password is not None:
-                print("You must set username and password to subscribe")
-                return result
-           
+        print(self.config['username'], self.config['password'], subscribe)
+        if self.config['username'] and self.config['password'] and subscribe: # has to be user
             print("subscribing")
             try:  
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
@@ -82,8 +70,7 @@ class BrowserInteractionBot():
                     print("User already subscribed")
                     result = False
             except:
-                print("Subscribing to video routine failed", sys.exc_info())
-        
+                print("subscribing to video routine failed", sys.exc_info())
         else:
             result = False
 
@@ -234,10 +221,8 @@ class BrowserInteractionBot():
 
         return result
     def routine(self):
-        self.seleniumTools.createNewTab("data:;")
-
         print("Automating browser interactions")
-        if not self.signIn(): # if username and password set and successfully logged in else be anon user
+        if not self.signIn(): # if username and password set else be anon user
             sys.exit()
 
         self.seleniumTools.driver.get(self.buildSearchUrl())
@@ -265,8 +250,8 @@ class BrowserInteractionBot():
     
     def run(self):
         frequency = self.config["frequency"]   
-        def runTimer(): 
-            threading.Timer(frequency, runTimer).start()        
-            self.routine() #runs immediately as well
-
-        runTimer()
+        runJob(
+            frequency=frequency, 
+            waitingMessage="Browser Interactions Bot waiting...", 
+            callback=self.routine
+        )
