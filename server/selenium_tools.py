@@ -8,7 +8,7 @@ class SeleniumTools():
     def __init__(self, driver):
         self.driver = driver
 
-    def createNewTab(self, url):
+    def createNewTab(self):
         self.driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't') 
         newTabIndex = len(self.driver.window_handles)-1
         newTab = self.driver.window_handles[newTabIndex]
