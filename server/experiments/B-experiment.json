@@ -1,0 +1,15 @@
+{
+  "experimentType": "ping-pong",
+  "iterationsToBounce": 3,
+  "topicCategory": ["nightmare before christmas", "nirvana"],
+  "frequency": 60,
+  "clickVideo": true,
+  "likeType": 1,
+  "comment": null,
+  "subscribe": false,
+  "paid": false,
+  "related": null,
+  "report": false,
+  "username": "test.person989",
+  "password": "testperson123"
+}
