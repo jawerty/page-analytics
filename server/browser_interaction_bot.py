@@ -10,7 +10,7 @@ class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
         self.config = config
         self.seleniumTools = seleniumTools
-<<<<<<< HEAD
+        self.signedIn = False
         self.experimentType = self.config["experimentType"]
         topicConfigFile = './experiments/topics.json'
         try:
@@ -36,9 +36,7 @@ class BrowserInteractionBot():
                 if topicCategory not in self.topicConfig:
                     print("Topic Category", topicCategory, "not in topics.json! Check you used the correct topic name.")
                     sys.exit()
-=======
-        self.signedIn = False
->>>>>>> 2c2550aca5c722021f77f8a3ab91f33f662ab117
+
 
             # take the first topicCategory
             self.currentTopicCategory = topicCategories[0]
@@ -271,16 +269,10 @@ class BrowserInteractionBot():
 
     def routine(self):
         print("Automating browser interactions")
-<<<<<<< HEAD
-        if not self.signIn(): # if username and password set else be anon user
-            sys.exit()
-        
-=======
         if not self.signedIn:
             if not self.signIn(): # if username and password set else be anon user
                 sys.exit()
 
->>>>>>> 2c2550aca5c722021f77f8a3ab91f33f662ab117
         self.seleniumTools.driver.get(self.buildSearchUrl())
         self.seleniumTools.waitForCssSelector(endpoint='.ytd-video-renderer', clickable=True)
         

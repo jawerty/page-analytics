@@ -26,7 +26,7 @@ class Experiment():
             sys.exit()
 
         try:
-            profile = webdriver.FirefoxProfile("/Users/finchmf/Library/Application Support/Firefox/Profiles/bbzj05e8.default")
+            profile = webdriver.FirefoxProfile("/Users/jared/Library/Application Support/Firefox/Profiles/diryp3p3.default")
             profile.set_preference("dom.webdriver.enabled", False)
             profile.set_preference('useAutomationExtension', False)
             profile.update_preferences()
