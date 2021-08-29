@@ -45,13 +45,14 @@ class RecommendedContentBot():
         if self.seleniumTools.waitForCssSelector(".style-scope.ytd-video-meta-block", visibility=True):
             links = self.findHrefs()[0:8]
             videoData = self.collectVideoData(videoLink=links[0])
+            print(videoData)
         print("RecommendedContentBot finished")
 
         
     def run(self):
         frequency = 600 
         runJob(
-            frequency=frequency, 
-            waitingMessage="Recommended bot waiting...", 
-            callback=self.routine
+            frequency,
+            self.routine, 
+            "Recommended bot waiting..." 
         )

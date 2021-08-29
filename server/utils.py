@@ -1,3 +1,4 @@
+from functools import partial
 import time
 import threading
 import _globals
@@ -11,7 +12,8 @@ def runJob(frequency: int, callback: Callable, waitingMessage: str = None, ):
                 print(waitingMessage) 
     
     _globals.lockProcess = True
-    threading.Timer(frequency, runJob).start()        
+    runJobPartial = partial(runJob, frequency, callback, waitingMessage)
+    threading.Timer(frequency, runJobPartial).start()        
     callback() #runs immediately as well
     _globals.lockProcess = False
     
