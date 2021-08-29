@@ -1,6 +1,7 @@
 import sys
 import random
 import time
+import json
 import threading
 import _globals
 from utils import runJob
@@ -9,10 +10,53 @@ class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
         self.config = config
         self.seleniumTools = seleniumTools
+        self.experimentType = self.config["experimentType"]
+        topicConfigFile = './experiments/topics.json'
+        try:
+            f = open(topicConfigFile,)
+            self.topicConfig = json.load(f)
+        except:
+            print("Couldn't open topic config:", sys.exc_info()[0])
+            sys.exit()
+        
+        if self.experimentType == "topic":
+            topicCategory = self.config["topicCategory"]
+            if topicCategory in self.topicConfig:
+                self.topics = self.topicConfig[topicCategory]
+            else:
+                print("Topic Category", topicCategory, "not in topics.json! Check you used the correct topic name.")
+                sys.exit()
 
+        elif self.experimentType == "ping-pong":
+            # topicCategory is an array for ping pong
+            topicCategories = self.config["topicCategory"]
+            # just check if a topic does not exist
+            for topicCategory in topicCategories:
+                if topicCategory not in self.topicConfig:
+                    print("Topic Category", topicCategory, "not in topics.json! Check you used the correct topic name.")
+                    sys.exit()
+
+            # take the first topicCategory
+            self.currentTopicCategory = topicCategories[0]
+            self.topics = self.topicConfig[topicCategories[0]]
+            self.pingPongIterations = 0 # only used for ping pong experiements
+    
+    def pingPongTopics(self):
+        topicCategories = self.config["topicCategory"]
+        topicCategoryIndex = topicCategories.index(self.currentTopicCategory)
+        if topicCategoryIndex == len(topicCategories) - 1:
+            newTopicCategoryIndex = 0 # reset if it hit the end of the array
+        else:
+            newTopicCategoryIndex = topicCategoryIndex + 1
+        newTopicCategory = topicCategories[newTopicCategoryIndex]
+        print("going from topic", self.currentTopicCategory, "to", newTopicCategory)
+        self.currentTopicCategory = newTopicCategory
+        self.topics = self.topicConfig[newTopicCategory]
+        
     def getRandomTopic(self):
-        print("Using topic", random.choice(self.config['topics']))
-        return random.choice(self.config['topics'])
+        randomTopic = random.choice(self.topics)
+        print("Using topic", randomTopic)
+        return randomTopic
 
     def buildSearchUrl(self):
         searchQuery = "+".join(self.getRandomTopic().split(" "))
@@ -220,11 +264,12 @@ class BrowserInteractionBot():
                 print("Related video routine did not work: ", sys.exc_info())
 
         return result
+
     def routine(self):
         print("Automating browser interactions")
         if not self.signIn(): # if username and password set else be anon user
             sys.exit()
-
+        
         self.seleniumTools.driver.get(self.buildSearchUrl())
         self.seleniumTools.waitForCssSelector(endpoint='.ytd-video-renderer', clickable=True)
         
@@ -246,12 +291,21 @@ class BrowserInteractionBot():
         # related
         self.related()
 
+        
+        if self.experimentType == "ping-pong":
+            self.pingPongIterations = self.pingPongIterations + 1
+            if self.pingPongIterations == self.config['iterationsToBounce']:
+                print("Bouncing topics")
+                self.pingPongIterations = 0
+                # go to next topic category in topicCategory array or reset to 0th index
+                self.pingPongTopics() 
+
         print("Browser interactions finished") 
     
     def run(self):
         frequency = self.config["frequency"]   
         runJob(
-            frequency=frequency, 
-            waitingMessage="Browser Interactions Bot waiting...", 
-            callback=self.routine
+            frequency, 
+            self.routine,
+            "Browser Interactions Bot waiting..." 
         )

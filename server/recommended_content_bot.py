@@ -51,7 +51,7 @@ class RecommendedContentBot():
     def run(self):
         frequency = 600 
         runJob(
-            frequency=frequency, 
-            waitingMessage="Recommended bot waiting...", 
-            callback=self.routine
+            frequency, 
+            self.routine,
+            "Recommended bot waiting..."
         )
