@@ -1,3 +1,4 @@
+from functools import partial
 import time
 import threading
 import _globals

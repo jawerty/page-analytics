@@ -10,6 +10,7 @@ class BrowserInteractionBot():
     def __init__(self, config, seleniumTools):
         self.config = config
         self.seleniumTools = seleniumTools
+<<<<<<< HEAD
         self.experimentType = self.config["experimentType"]
         topicConfigFile = './experiments/topics.json'
         try:
@@ -35,6 +36,9 @@ class BrowserInteractionBot():
                 if topicCategory not in self.topicConfig:
                     print("Topic Category", topicCategory, "not in topics.json! Check you used the correct topic name.")
                     sys.exit()
+=======
+        self.signedIn = False
+>>>>>>> 2c2550aca5c722021f77f8a3ab91f33f662ab117
 
             # take the first topicCategory
             self.currentTopicCategory = topicCategories[0]
@@ -143,11 +147,11 @@ class BrowserInteractionBot():
                 nextButton2 = self.seleniumTools.driver.find_element_by_css_selector('#passwordNext button')
                 oldPage = self.seleniumTools.driver.find_element_by_tag_name('html')
                 nextButton2.click()
-
                 # Check if new page loaded (page wont change if login fails)
                 if self.seleniumTools.wait_for_page_load(oldPage):
                     print("Logged in successful")
                     result = True
+                    self.signedIn = True
                 else:
                     print("Could not log in")
                     result = False
@@ -267,9 +271,16 @@ class BrowserInteractionBot():
 
     def routine(self):
         print("Automating browser interactions")
+<<<<<<< HEAD
         if not self.signIn(): # if username and password set else be anon user
             sys.exit()
         
+=======
+        if not self.signedIn:
+            if not self.signIn(): # if username and password set else be anon user
+                sys.exit()
+
+>>>>>>> 2c2550aca5c722021f77f8a3ab91f33f662ab117
         self.seleniumTools.driver.get(self.buildSearchUrl())
         self.seleniumTools.waitForCssSelector(endpoint='.ytd-video-renderer', clickable=True)
         
@@ -305,7 +316,7 @@ class BrowserInteractionBot():
     def run(self):
         frequency = self.config["frequency"]   
         runJob(
-            frequency, 
-            self.routine,
-            "Browser Interactions Bot waiting..." 
+            frequency,
+            self.routine, 
+            "Browser Interactions Bot waiting...", 
         )
