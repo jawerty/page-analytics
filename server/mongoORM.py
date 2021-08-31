@@ -12,17 +12,17 @@ class MongoCli:
         logger.info(f"Client Connected to server: {self.server}")
         self.database = self.client[f"{db}"]
         self.collection = self.database[f"{collection}"]
-        logger.info(f"Client Connected to database: {db} | Collection: {collection}")
+        print(f"Client Connected to database: {db} | Collection: {collection}")
 
     def insertMany(self, data: list):
         """Function to insert many documents"""
         self.collection.insert_many(data)
-        logger.info(f'{len(data)} Documents Added')
+        print(f'{len(data)} Documents Added')
 
     def insert(self, data: dict):
         """Function to insert one document"""
         self.collection.insert(data)
-        logger.info('Document Added')
+        print('Document Added')
 
     def findAll(self) -> list:
         """Function to retrieve all documents from a collection"""
@@ -30,7 +30,7 @@ class MongoCli:
         for data in self.collection.find():
             found_data.append(data)
         # the return is a list of dictionaries
-        logger.info(f'Found {len(found_data)} Documents')
+        print(f'Found {len(found_data)} Documents')
         return found_data
 
     def findOne(self) -> dict:
@@ -44,7 +44,7 @@ class MongoCli:
         for data in self.collection.find(query):
             found_data.append(data)
         # the return is a list of dictionaries
-        logger.info(f'Found {len(found_data)} Documents')
+        print(f'Found {len(found_data)} Documents')
         return found_data
 
 class MongoORM(MongoCli):
