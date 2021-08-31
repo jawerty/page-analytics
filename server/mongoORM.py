@@ -1,4 +1,5 @@
 import pymongo
+import app_config
 
 class MongoCli:
     """Object to handle Mongo Connection"""
@@ -49,7 +50,7 @@ class MongoCli:
 
 class MongoORM(MongoCli):
     """Object to connect to local mongodb"""
-    server = '' # add config info here
+    server = app_config.mongoDB
 
     def __init__(self, database: str, collection: str):
         super().__init__(server=MongoModel.server)

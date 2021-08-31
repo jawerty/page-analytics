@@ -8,6 +8,7 @@ import threading
 import _globals
 import time
 from utils import runJob
+from dataParser import Parser
 
 class RecommendedContentBot():
     def __init__(self, config, seleniumTools):
@@ -23,29 +24,31 @@ class RecommendedContentBot():
         return links
 
 
-    def collectVideoData(self, videoLink: str) -> dict:
-
+    def collectVideoData(self, videoLink: str, videoNumber: int) -> dict:
+        """function to find video data per recommended video"""
         r =  requests.get(videoLink)
         soup = BeautifulSoup(r.content, 'html.parser')
-        keywords = soup.find('meta', {'name':'keywords'})['content']
-        # continue to find logic
-        # xpath to find the beautiful to find script tags with ytInitalData
-        # remove var, get script content then json dump
-        """//script[contains(text(),"ytInitialData")] -- bs4 equivalence 
-            soup(text=re.compile(r' ytInitialData')):
-            .split("var ytInitialData = ")[1]
-            remove semicolon from the string
-            json.loads everything"""
-        return keywords
+        data = Parser(soup=soup, videoNumber=videoNumber).collect()
+
+        return data
+
+    def sendData(self, data: list):
+        """function to send videoData objects to mongoDB"""
+        pass
 
 
     def routine(self):
+        """function to run recommended bot"""
         print("Fetching recommended content")
         self.seleniumTools.driver.get("https://youtube.com")
         if self.seleniumTools.waitForCssSelector(".style-scope.ytd-video-meta-block", visibility=True):
             links = self.findHrefs()[0:8]
-            videoData = self.collectVideoData(videoLink=links[0])
+            videoData = []
+            for i, link in enumerate(links):
+                data = self.collectVideoData(videoLink=link, videoNumber=i)
+                videoData.append(data)
             print(videoData)
+            # self.sendData(data=videoData)
         print("RecommendedContentBot finished")
 
         
