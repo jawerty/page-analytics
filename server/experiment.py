@@ -14,6 +14,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 # from fake_useragent import UserAgent
 
 import _globals
+import app_config
 
 class Experiment():
     def __init__(self, experimentName):
@@ -26,7 +27,7 @@ class Experiment():
             sys.exit()
 
         try:
-            profile = webdriver.FirefoxProfile("/Users/finchmf/Library/Application Support/Firefox/Profiles/bbzj05e8.default")
+            profile = webdriver.FirefoxProfile(app_config.firefoxProfile)
             profile.set_preference("dom.webdriver.enabled", False)
             profile.set_preference('useAutomationExtension', False)
             profile.update_preferences()
@@ -34,7 +35,7 @@ class Experiment():
 
             self.driver = webdriver.Firefox(firefox_profile=profile,
                                     desired_capabilities=desired,
-                                    executable_path="./geckodriver")
+                                    executable_path=app_config.geckodriverLocation)
 
         except:
             print("Couldn't connect selenium driver", sys.exc_info())

@@ -3,7 +3,7 @@ import time
 import threading
 import _globals
 from typing import Callable
-
+from functools import partial
 def runJob(frequency: int, callback: Callable, waitingMessage: str = None, ): 
     if _globals.lockProcess:
         while _globals.lockProcess:
