@@ -83,13 +83,20 @@ class BrowserInteractionBot():
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 likeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:first-of-type")
                 print(likeButton)
-                likeButton.click()
-                print("liked it")
+                if 'style-default-active' in likeButton.get_attribute('class').split():
+                    print("already liked!")
+                else:
+                    likeButton.click()
+                    print("liked it")
                 result = True
             elif likeType == 0:
                 self.seleniumTools.waitForCssSelector(endpoint="ytd-video-primary-info-renderer #info", visibility=True)
                 dislikeButton = self.seleniumTools.driver.find_element_by_css_selector("ytd-video-primary-info-renderer ytd-toggle-button-renderer:last-of-type")
-                dislikeButton.click()
+                if 'style-default-active' in dislikeButton.get_attribute('class').split():
+                    print("already disliked!")
+                else:
+                    dislikeButton.click()
+                    print("disliked it")
                 result = True
             else:
                 # likeVideo is null
