@@ -13,7 +13,7 @@ class Parser:
     def setTimeStamp(self):
         """function to set up timestamp"""
         now: datetime = datetime.now()
-        self.response['Timestamp']: str = now.strftime('%Y/%m/%dT%H:%M:%S') 
+        self.response['timestamp']: str = now.strftime('%Y/%m/%dT%H:%M:%S') 
 
     def findVideoNumber(self):
         """function to label video number"""

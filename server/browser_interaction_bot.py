@@ -3,11 +3,16 @@ import random
 import time
 import json
 import threading
+import datetime
 import _globals
+import requests
+from app_config import flaskServer
 from utils import runJob
 
 class BrowserInteractionBot():
-    def __init__(self, config, seleniumTools):
+    def __init__(self, sessionId, experimentName, config, seleniumTools):
+        self.sessionId = sessionId
+        self.experimentName = experimentName
         self.config = config
         self.seleniumTools = seleniumTools
         self.signedIn = False
@@ -43,6 +48,25 @@ class BrowserInteractionBot():
             self.topics = self.topicConfig[topicCategories[0]]
             self.pingPongIterations = 0 # only used for ping pong experiements
     
+    def sendData(self, data: dict):
+        """function to send videoData objects to mongoDB"""
+        status = requests.post(f"{flaskServer}browserInteraction", json=data)
+    
+    def getBrowserInteractionData(self):
+        data: dict = {
+            'topic': self.randomTopic,
+            'config': self.config,
+            'experimentName': self.experimentName,
+            'timestamp':  datetime.datetime.now().strftime('%Y/%m/%dT%H:%M:%S'),
+            'sessionId': self.sessionId,
+        }
+
+        if self.experimentType == "ping-pong":
+            data['pingPongTopicCategory'] = self.currentTopicCategory
+            data['pingPongIteration'] = self.pingPongIterations
+        
+        return data
+
     def pingPongTopics(self):
         topicCategories = self.config["topicCategory"]
         topicCategoryIndex = topicCategories.index(self.currentTopicCategory)
@@ -61,7 +85,8 @@ class BrowserInteractionBot():
         return randomTopic
 
     def buildSearchUrl(self):
-        searchQuery = "+".join(self.getRandomTopic().split(" "))
+        self.randomTopic = self.getRandomTopic()
+        searchQuery = "+".join(self.randomTopic.split(" "))
         return f'https://www.youtube.com/results?search_query={searchQuery}'
 
     def hitSearchResultLink(self):
@@ -301,6 +326,7 @@ class BrowserInteractionBot():
         # related
         self.related()
 
+        self.sendData(data=self.getBrowserInteractionData())
         
         if self.experimentType == "ping-pong":
             self.pingPongIterations = self.pingPongIterations + 1

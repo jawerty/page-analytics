@@ -7,12 +7,15 @@ import requests
 import threading
 import _globals
 import time
+import datetime
 from utils import runJob
 from dataParser import Parser
 from app_config import flaskServer
 
 class RecommendedContentBot():
-    def __init__(self, config, seleniumTools):
+    def __init__(self, sessionId, experimentName, config, seleniumTools):
+        self.sessionId = sessionId
+        self.experimentName = experimentName
         self.config = config
         self.seleniumTools = seleniumTools
 
@@ -46,6 +49,8 @@ class RecommendedContentBot():
             videoData = []
             for i, link in enumerate(links):
                 data = self.collectVideoData(videoLink=link, videoNumber=i)
+                data['sessionId'] = self.sessionId
+                data['experimentName'] = self.experimentName
                 videoData.append(data)
             self.sendData(data=videoData)
         print("RecommendedContentBot finished")
