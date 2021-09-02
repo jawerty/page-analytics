@@ -10,7 +10,7 @@ class MongoCli:
     def connect(self, db: str, collection: str):
         """Connect to Database and Access Declared Collection"""
         self.client = pymongo.MongoClient(self.server)
-        logger.info(f"Client Connected to server: {self.server}")
+        print(f"Client Connected to server: {self.server}")
         self.database = self.client[f"{db}"]
         self.collection = self.database[f"{collection}"]
         print(f"Client Connected to database: {db} | Collection: {collection}")
@@ -53,7 +53,7 @@ class MongoORM(MongoCli):
     server = app_config.mongoDB
 
     def __init__(self, database: str, collection: str):
-        super().__init__(server=MongoModel.server)
+        super().__init__(server=MongoORM.server)
         # instantiates connection to database and collection on server
         # self.database = database
         # self.collection = collection

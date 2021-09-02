@@ -9,6 +9,7 @@ import _globals
 import time
 from utils import runJob
 from dataParser import Parser
+from app_config import flaskServer
 
 class RecommendedContentBot():
     def __init__(self, config, seleniumTools):
@@ -23,7 +24,6 @@ class RecommendedContentBot():
             links.append(ele.get_attribute('href'))
         return links
 
-
     def collectVideoData(self, videoLink: str, videoNumber: int) -> dict:
         """function to find video data per recommended video"""
         r =  requests.get(videoLink)
@@ -34,9 +34,9 @@ class RecommendedContentBot():
 
     def sendData(self, data: list):
         """function to send videoData objects to mongoDB"""
-        pass
-
-
+        data: dict = {'data': data}
+        status = requests.post(f"{flaskServer}video", json=data)
+        
     def routine(self):
         """function to run recommended bot"""
         print("Fetching recommended content")
@@ -47,8 +47,7 @@ class RecommendedContentBot():
             for i, link in enumerate(links):
                 data = self.collectVideoData(videoLink=link, videoNumber=i)
                 videoData.append(data)
-            print(videoData)
-            # self.sendData(data=videoData)
+            self.sendData(data=videoData)
         print("RecommendedContentBot finished")
 
         
