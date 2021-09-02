@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 class Parser:
     """object to parse video data from beautiful soup 
@@ -8,6 +9,11 @@ class Parser:
         self.soup: object = soup
         self.videoNumber: int = videoNumber
         self.response: dict = {}
+
+    def setTimeStamp(self):
+        """function to set up timestamp"""
+        now: datetime = datetime.now()
+        self.response['Timestamp']: str = now.strftime('%Y/%m/%dT%H:%M:%S') 
 
     def findVideoNumber(self):
         """function to label video number"""
@@ -24,9 +30,14 @@ class Parser:
         self.response['keywords']: list = self.soup.find('meta', {'name': 'keywords'})['content'].split(', ')
         self.response['keyword_count']: int = len(self.response['keywords'])
 
+    def searchReturns(self):
+        """funciton to research available data"""
+        print(self.soup.find('meta'))
+
 
     def collect(self) -> dict:
         """function to run full collection"""
+        self.setTimeStamp()
         self.findVideoNumber()
         self.findTitle()
         self.findKeywords()
