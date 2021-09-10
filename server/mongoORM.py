@@ -7,13 +7,15 @@ class MongoCli:
 
         self.server = server
     
-    def connect(self, db: str, collection: str):
+    def connect(self, db: str):
         """Connect to Database and Access Declared Collection"""
         self.client = pymongo.MongoClient(self.server)
         print(f"Client Connected to server: {self.server}")
         self.database = self.client[f"{db}"]
+        print(f"Client Connected to database: {db}")
+
+    def setCollection(self, collection: str):
         self.collection = self.database[f"{collection}"]
-        print(f"Client Connected to database: {db} | Collection: {collection}")
 
     def insertMany(self, data: list):
         """Function to insert many documents"""
@@ -52,9 +54,9 @@ class MongoORM(MongoCli):
     """Object to connect to local mongodb"""
     server = app_config.mongoDB
 
-    def __init__(self, database: str, collection: str):
+    def __init__(self, database: str):
         super().__init__(server=MongoORM.server)
         # instantiates connection to database and collection on server
         # self.database = database
         # self.collection = collection
-        self.connect(db=database, collection=collection)
+        self.connect(db=database)

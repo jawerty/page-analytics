@@ -3,6 +3,7 @@ import atexit
 import time
 import sys
 import json
+import uuid
 from threading import Thread
 from selenium import webdriver
 
@@ -18,6 +19,8 @@ import app_config
 
 class Experiment():
     def __init__(self, experimentName):
+        self.experimentName = experimentName
+        self.sessionId = str(uuid.uuid4())
         experimentConfigFile = f'./experiments/{experimentName}-experiment.json'
         try:
             f = open(experimentConfigFile,)
@@ -45,9 +48,11 @@ class Experiment():
         self.driver.quit()
 
     def run(self):
+        sessionId = str(uuid.uuid4())
+
         self.seleniumTools = SeleniumTools(self.driver)
-        self.browseBot = BrowserInteractionBot(self.config, self.seleniumTools)
-        self.recBot = RecommendedContentBot(self.config, self.seleniumTools)
+        self.browseBot = BrowserInteractionBot(self.sessionId, self.experimentName, self.config, self.seleniumTools)
+        self.recBot = RecommendedContentBot(self.sessionId, self.experimentName, self.config, self.seleniumTools)
         thread1 = Thread(target=self.browseBot.run)
         thread2 = Thread(target=self.recBot.run)
 

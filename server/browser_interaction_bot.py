@@ -1,16 +1,24 @@
 import sys
 import random
 import time
+import pickle
 import json
 import threading
+import datetime
 import _globals
+import requests
+from app_config import flaskServer
 from utils import runJob
 
 class BrowserInteractionBot():
-    def __init__(self, config, seleniumTools):
+    def __init__(self, sessionId, experimentName, config, seleniumTools):
+        self.cookiesCache = { 'cookiesByUser': {} } # file will overwrite this most of the time
+        self.sessionId = sessionId
+        self.experimentName = experimentName
         self.config = config
         self.seleniumTools = seleniumTools
         self.signedIn = False
+        self.scrolled = False
         self.experimentType = self.config["experimentType"]
         topicConfigFile = './experiments/topics.json'
         try:
@@ -42,7 +50,77 @@ class BrowserInteractionBot():
             self.currentTopicCategory = topicCategories[0]
             self.topics = self.topicConfig[topicCategories[0]]
             self.pingPongIterations = 0 # only used for ping pong experiements
+
+    def saveCookiesForUser(self, url): 
+        # runs after every successful login
+        # self.cookiesCache
+        username = self.config['username']
+        if username:
+            self.seleniumTools.driver.get(url)
+            cookies = self.seleniumTools.driver.get_cookies()
+            if username not in self.cookiesCache['cookiesByUser']:
+                self.cookiesCache['cookiesByUser'][username] = {}
+
+            self.cookiesCache['cookiesByUser'][username][url] = cookies
+            with open('./cookies-cache.json', 'w') as outfile:
+            
+                json.dump(self.cookiesCache, outfile, indent=4 )
+                
+            print("Cookies Cache written with new cookies")
+            return True
+        else:
+            return False
+
+    def loadCookiesForUser(self, url):
+        username = self.config['username']
+        if not username:
+            return False
+
+        # get cookies for user if cookies exist
+        self.seleniumTools.driver.get(url)
+        cookiesCacheFile = './cookies-cache.json'
+        try:
+            f = open(cookiesCacheFile,)
+            self.cookiesCache = json.load(f)
+        except:
+            print("Couldn't open cookie config file:", sys.exc_info()[0])
+            sys.exit()
+        
+        if username in self.cookiesCache["cookiesByUser"]:
+            print("Loading cookies...")
+            cookies = self.cookiesCache["cookiesByUser"][username][url]
+            if cookies:
+                for cookie in cookies:
+                    print(cookie)
+                    self.seleniumTools.driver.add_cookie(cookie)
+            else:
+                print(f'No cookies set for {username}')
+        else:
+            print(f'No cookies set for {username}')
+            return False
+
+        print(f'Cookies loaded added for {username}')
+        return True
+
+    def sendData(self, data: dict):
+        """function to send videoData objects to mongoDB"""
+        status = requests.post(f"{flaskServer}browserInteraction", json=data)
     
+    def getBrowserInteractionData(self):
+        data: dict = {
+            'topic': self.randomTopic,
+            'config': self.config,
+            'experimentName': self.experimentName,
+            'timestamp':  datetime.datetime.now().strftime('%Y/%m/%dT%H:%M:%S'),
+            'sessionId': self.sessionId,
+        }
+
+        if self.experimentType == "ping-pong":
+            data['pingPongTopicCategory'] = self.currentTopicCategory
+            data['pingPongIteration'] = self.pingPongIterations
+        
+        return data
+
     def pingPongTopics(self):
         topicCategories = self.config["topicCategory"]
         topicCategoryIndex = topicCategories.index(self.currentTopicCategory)
@@ -61,7 +139,8 @@ class BrowserInteractionBot():
         return randomTopic
 
     def buildSearchUrl(self):
-        searchQuery = "+".join(self.getRandomTopic().split(" "))
+        self.randomTopic = self.getRandomTopic()
+        searchQuery = "+".join(self.randomTopic.split(" "))
         return f'https://www.youtube.com/results?search_query={searchQuery}'
 
     def hitSearchResultLink(self):
@@ -129,13 +208,31 @@ class BrowserInteractionBot():
 
         return result
 
+    def isLoggedInToYoutube(self):
+        print("Checking if logged in to YouTube")
+        self.seleniumTools.driver.get("https://youtube.com")
+        try:
+            self.seleniumTools.waitForCssSelector(endpoint="#avatar-btn", visibility=True, seconds=10)
+            print ("Already logged into Youtube (from cookies)")
+            return True
+        except:
+            print(sys.exc_info())
+            print("Not logged in")
+            return False
+        
     def signIn(self):
         result = False
         username = self.config['username']
         password = self.config['password']
         try:
             if username and password:
-                # Go to google login
+                self.loadCookiesForUser("https://google.com") # returns False if user doesnt exist
+                self.loadCookiesForUser("https://youtube.com") # returns False if user doesnt exist
+                # check if they're logged in after loading the cookies
+                if self.isLoggedInToYoutube():
+                    return True
+
+                # check if user is already signed in
                 self.seleniumTools.driver.get('https://accounts.google.com/ServiceLogin/signinchooser')
                 self.seleniumTools.waitForCssSelector(endpoint='#identifierId', visibility=True)
                 
@@ -157,6 +254,8 @@ class BrowserInteractionBot():
                     print("Logged in successful")
                     result = True
                     self.signedIn = True
+                    self.saveCookiesForUser("https://google.com")
+                    self.saveCookiesForUser("https://youtube.com")
                 else:
                     print("Could not log in")
                     result = False
@@ -276,6 +375,7 @@ class BrowserInteractionBot():
 
     def routine(self):
         print("Automating browser interactions")
+
         if not self.signedIn:
             if not self.signIn(): # if username and password set else be anon user
                 sys.exit()
@@ -301,6 +401,7 @@ class BrowserInteractionBot():
         # related
         self.related()
 
+        self.sendData(data=self.getBrowserInteractionData())
         
         if self.experimentType == "ping-pong":
             self.pingPongIterations = self.pingPongIterations + 1

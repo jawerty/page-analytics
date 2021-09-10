@@ -24,18 +24,19 @@ class SeleniumTools():
 
         return result
 
-    def waitForCssSelector(self, endpoint: str, clickable: bool =  False, visibility: bool = False ) -> bool:
+    def waitForCssSelector(self, endpoint: str, clickable: bool =  False, visibility: bool = False, seconds: int = 30 ) -> bool:
         try:
             if clickable:
-                response = WebDriverWait(self.driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f'{endpoint}')))
+                response = WebDriverWait(self.driver, seconds).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f'{endpoint}')))
                 result = True
             elif visibility:
-                response = WebDriverWait(self.driver, 30).until(EC.visibility_of_element_located((By.CSS_SELECTOR, f'{endpoint}')))
+                response = WebDriverWait(self.driver, seconds).until(EC.visibility_of_element_located((By.CSS_SELECTOR, f'{endpoint}')))
                 result = True
             else:
                 print('Choose Selector Type: clickable | visibility')
                 result = False
         except:
+            print(sys.exc_info())
             result = False
 
         return result
