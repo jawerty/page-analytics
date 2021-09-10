@@ -230,6 +230,7 @@ class BrowserInteractionBot():
                 self.loadCookiesForUser("https://youtube.com") # returns False if user doesnt exist
                 # check if they're logged in after loading the cookies
                 if self.isLoggedInToYoutube():
+                    self.signedIn = True
                     return True
 
                 # check if user is already signed in
@@ -300,9 +301,8 @@ class BrowserInteractionBot():
                         return result
 
                 # need to scroll down page to open commenting
-                if not self.scrolled:
-                    self.seleniumTools.driver.execute_script("window.scrollTo(0, 500)") 
-                    self.scrolled = True
+                self.seleniumTools.driver.execute_script("window.scrollTo(0, 500)") 
+                self.scrolled = True
 
                 textareaSelector = "#placeholder-area.ytd-comment-simplebox-renderer"
                 self.seleniumTools.waitForCssSelector(endpoint=textareaSelector, visibility=True)
