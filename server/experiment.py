@@ -6,6 +6,7 @@ import json
 import uuid
 from threading import Thread
 from selenium import webdriver
+from geopy.geocoders import Nominatim
 
 from browser_interaction_bot import BrowserInteractionBot
 from recommended_content_bot import RecommendedContentBot
@@ -29,10 +30,23 @@ class Experiment():
             print("Couldn't open experiment config:", sys.exc_info()[0])
             sys.exit()
 
+        
         try:
             profile = webdriver.FirefoxProfile(app_config.firefoxProfile)
             profile.set_preference("dom.webdriver.enabled", False)
             profile.set_preference('useAutomationExtension', False)
+            try:
+                latLong = self.getGeoLocation()
+                print(latLong)
+                if latLong:
+                    profile.set_preference("geo.prompt.testing", True) 
+                    profile.set_preference("geo.prompt.testing.allow", True)
+                    profile.set_preference("geo.wifi.scan", True)
+                    profile.set_preference("geo.wifi.uri", 'data:application/json,{"location":{"lat": ' + str(latLong[0]) + ',"lng":' + str(latLong[1])  + '},"accuracy": 100.0}')
+            except:
+                print("Couldn't get lat and long information", sys.exc_info())
+
+            
             profile.update_preferences()
             desired = DesiredCapabilities.FIREFOX
 
@@ -44,6 +58,15 @@ class Experiment():
             print("Couldn't connect selenium driver", sys.exc_info())
             sys.exit()
     
+    def getGeoLocation(self):
+        location = self.config['location']
+        if location:
+            geolocator = Nominatim(user_agent="pageAnalytics")
+            location = geolocator.geocode(location)
+            return [location.latitude, location.longitude]
+        
+        return None
+
     def exit_handler(self):
         self.driver.quit()
 
