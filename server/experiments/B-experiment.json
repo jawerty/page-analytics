@@ -10,6 +10,7 @@
   "paid": false,
   "related": null,
   "report": false,
+  "getAdInfo": false,
   "username": "test.person989",
   "password": "testperson123"
 }

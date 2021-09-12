@@ -19,6 +19,7 @@ class BrowserInteractionBot():
         self.seleniumTools = seleniumTools
         self.signedIn = False
         self.scrolled = False
+        self.adInfo = []
         self.experimentType = self.config["experimentType"]
         topicConfigFile = './experiments/topics.json'
         try:
@@ -113,6 +114,7 @@ class BrowserInteractionBot():
             'experimentName': self.experimentName,
             'timestamp':  datetime.datetime.now().strftime('%Y/%m/%dT%H:%M:%S'),
             'sessionId': self.sessionId,
+            'adInfo': self.adInfo
         }
 
         if self.experimentType == "ping-pong":
@@ -373,6 +375,16 @@ class BrowserInteractionBot():
 
         return result
 
+    def getAdInfo(self):
+        getAdInfo = self.config['getAdInfo']
+        result = False
+        if getAdInfo:
+            adPlacementsData = self.seleniumTools.getAdPlacementData()
+            if adPlacementsData:
+                self.adInfo = adPlacementsData
+            
+        return result
+
     def routine(self):
         print("Automating browser interactions")
 
@@ -385,22 +397,25 @@ class BrowserInteractionBot():
         
         # clickVideo
         self.hitSearchResultLink() 
-
+        print("like")
         # likeType
         self.likeVideo()
-
+        print('subscribe')
         # subscribe
         self.subscribe()
-       
+        print("comment")
         # comment
         self.comment()
-
+        print('report')
         # report
         self.report()
-
+        print('report')
+        # getAdInfo
+        self.getAdInfo()
+        print('related')
         # related
         self.related()
-
+        print('senddata')
         self.sendData(data=self.getBrowserInteractionData())
         
         if self.experimentType == "ping-pong":
