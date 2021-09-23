@@ -32,6 +32,11 @@ def browserInteraction() -> jsonify:
     print(result)
     return jsonify({'result': result})
 
+@server.route('/fetchData')
+def fetchData() -> jsonify:
+    # inplace for when front end graphs are needed
+    pass
+
 
 if __name__ == '__main__':
     server.run(debug=True)
