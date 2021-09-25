@@ -63,6 +63,17 @@ class SeleniumTools():
 
         return result
 
+    def getMetadataForRecommendedVideos(self):
+        try:
+            with open('get-recommended-metadata.js', 'r') as file:
+                findScript = file.read().replace('\n', '')
+
+            recommendedMetadata = WebDriverWait(self.driver, 30).until(lambda driver: driver.execute_script(findScript))
+            return recommendedMetadata
+        except:
+            print("Could not get recommended metadata", sys.exc_info())
+            return None
+
     def getAdPlacementData(self):
         try:
             findScript = "function _e_x_p_() { try { result = window.ytcfg.data_.SBOX_SETTINGS.SEARCHBOX_COMPONENT.__dataHost.parentComponent.__data.data.playerResponse.adPlacements; } catch (e) { result = null; } return result; }; return _e_x_p_();"

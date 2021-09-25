@@ -12,6 +12,9 @@ from utils import runJob
 from dataParser import Parser
 from app_config import flaskServer
 
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
+
 class RecommendedContentBot():
     def __init__(self, sessionId, experimentName, config, seleniumTools):
         self.sessionId = sessionId
@@ -45,14 +48,31 @@ class RecommendedContentBot():
         print("Fetching recommended content")
         self.seleniumTools.driver.get("https://youtube.com")
         if self.seleniumTools.waitForCssSelector(".style-scope.ytd-video-meta-block", visibility=True):
+            recommendedMetadata = self.seleniumTools.getMetadataForRecommendedVideos()                
             links = self.findHrefs()[0:8]
-            videoData = []
+            videoDataMap = {}
             for i, link in enumerate(links):
                 data = self.collectVideoData(videoLink=link, videoNumber=i)
                 data['sessionId'] = self.sessionId
                 data['experimentName'] = self.experimentName
-                videoData.append(data)
+
+                parsed_url = urlparse(link)
+                videoId = parse_qs(parsed_url.query)['v'][0]
+
+                data['videoId'] = videoId
+                videoDataMap[data['videoId']] = data
+                print(data['videoId'])
+            
+            if recommendedMetadata is not None and len(recommendedMetadata) > 0:
+                for recommendedMetadataItem in recommendedMetadata:
+                    if recommendedMetadataItem['videoId'] in videoDataMap:
+                        videoData = videoDataMap[recommendedMetadataItem['videoId']].copy()
+                        videoData.update(recommendedMetadataItem)
+                        videoDataMap[recommendedMetadataItem['videoId']] = videoData
+                    
+            videoData = list(videoDataMap.values())
             self.sendData(data=videoData)
+
         print("RecommendedContentBot finished")
 
         
