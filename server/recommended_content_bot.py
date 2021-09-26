@@ -68,9 +68,7 @@ class RecommendedContentBot():
 
                 data['videoId'] = videoId
                 videoDataMap[data['videoId']] = data
-            
-                print("got video")
-            
+                        
             if recommendedMetadata is not None:
                 recommendedVideos = recommendedMetadata["videos"]
                 recommendedAds = recommendedMetadata["ads"]
@@ -81,6 +79,7 @@ class RecommendedContentBot():
                             videoData = videoDataMap[recommendedMetadataVideo['videoId']].copy()
                             videoData.update(recommendedMetadataVideo)
                             videoDataMap[recommendedMetadataVideo['videoId']] = videoData
+                            print("got video metadata")
 
                 if len(recommendedAds) > 0:
                     now: datetime = datetime.now()
@@ -88,7 +87,7 @@ class RecommendedContentBot():
                         ad['sessionId'] = self.sessionId
                         ad['experimentName'] = self.experimentName
                         ad['timestamp']: str = now.strftime('%Y/%m/%dT%H:%M:%S') 
-                        print("got ad", ad)
+                        print("got ad metadata")
                         return ad
 
                     recommendedAds = list(map(setMoreData, recommendedAds))
