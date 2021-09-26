@@ -14,6 +14,7 @@ from app_config import flaskServer
 
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
+from datetime import datetime
 
 class RecommendedContentBot():
     def __init__(self, sessionId, experimentName, config, seleniumTools):
@@ -38,17 +39,23 @@ class RecommendedContentBot():
 
         return data
 
-    def sendData(self, data: list):
+    def sendVideoData(self, data: list):
         """function to send videoData objects to mongoDB"""
         data: dict = {'data': data}
         status = requests.post(f"{flaskServer}video", json=data)
-        
+    
+    def sendAdData(self, data: list):
+        """function to send videoData objects to mongoDB"""
+        data: dict = {'data': data}
+        status = requests.post(f"{flaskServer}ad", json=data)
+            
     def routine(self):
         """function to run recommended bot"""
         print("Fetching recommended content")
         self.seleniumTools.driver.get("https://youtube.com")
         if self.seleniumTools.waitForCssSelector(".style-scope.ytd-video-meta-block", visibility=True):
             recommendedMetadata = self.seleniumTools.getMetadataForRecommendedVideos()                
+            
             links = self.findHrefs()[0:8]
             videoDataMap = {}
             for i, link in enumerate(links):
@@ -61,17 +68,35 @@ class RecommendedContentBot():
 
                 data['videoId'] = videoId
                 videoDataMap[data['videoId']] = data
-                print(data['videoId'])
             
-            if recommendedMetadata is not None and len(recommendedMetadata) > 0:
-                for recommendedMetadataItem in recommendedMetadata:
-                    if recommendedMetadataItem['videoId'] in videoDataMap:
-                        videoData = videoDataMap[recommendedMetadataItem['videoId']].copy()
-                        videoData.update(recommendedMetadataItem)
-                        videoDataMap[recommendedMetadataItem['videoId']] = videoData
+                print("got video")
+            
+            if recommendedMetadata is not None:
+                recommendedVideos = recommendedMetadata["videos"]
+                recommendedAds = recommendedMetadata["ads"]
+
+                if len(recommendedVideos) > 0:
+                    for recommendedMetadataVideo in recommendedVideos:
+                        if recommendedMetadataVideo['videoId'] in videoDataMap:
+                            videoData = videoDataMap[recommendedMetadataVideo['videoId']].copy()
+                            videoData.update(recommendedMetadataVideo)
+                            videoDataMap[recommendedMetadataVideo['videoId']] = videoData
+
+                if len(recommendedAds) > 0:
+                    now: datetime = datetime.now()
+                    def setMoreData(ad):
+                        ad['sessionId'] = self.sessionId
+                        ad['experimentName'] = self.experimentName
+                        ad['timestamp']: str = now.strftime('%Y/%m/%dT%H:%M:%S') 
+                        print("got ad", ad)
+                        return ad
+
+                    recommendedAds = list(map(setMoreData, recommendedAds))
+                    self.sendAdData(data=recommendedAds)
                     
             videoData = list(videoDataMap.values())
-            self.sendData(data=videoData)
+            self.sendVideoData(data=videoData)
+            
 
         print("RecommendedContentBot finished")
 
