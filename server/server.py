@@ -27,6 +27,20 @@ def video() -> jsonify:
     print(result)
     return jsonify({'result': result})
 
+@server.route('/ad', methods=["POST"])
+def ad() -> jsonify:
+    """endpoint to recieve ad recommendation data and input into mongo db"""
+    content = request.json
+    data: list = content['data']
+    try:
+        ORM.setCollection('adRecommendationData')
+        ORM.insertMany(data)
+        result: bool = True
+    except:
+        result: bool = False
+    print(result)
+    return jsonify({'result': result})
+
 @server.route('/browserInteraction', methods=["POST"])
 def browserInteraction() -> jsonify:
     """endpoint to recieve browser interaction data and input into mongo db"""

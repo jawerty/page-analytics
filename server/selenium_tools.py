@@ -53,6 +53,7 @@ class SeleniumTools():
             result = False
 
         return result
+
     def setAttribute(self, element, attrName, attrValue):
         try:
             self.driver.execute_script(f'arguments[0].setAttribute(\'{attrName}\',arguments[1])',element, attrValue)
@@ -61,3 +62,34 @@ class SeleniumTools():
             result = False
 
         return result
+
+    def getMetadataForRecommendedVideos(self):
+        try:
+            with open('get-recommended-metadata.js', 'r') as file:
+                findScript = file.read().replace('\n', '')
+
+            recommendedMetadata = WebDriverWait(self.driver, 30).until(lambda driver: driver.execute_script(findScript))
+            return recommendedMetadata
+        except:
+            print("Could not get recommended metadata", sys.exc_info())
+            return None
+
+    def getAdPlacementData(self):
+        try:
+            findScript = "function _e_x_p_() { try { result = window.ytcfg.data_.SBOX_SETTINGS.SEARCHBOX_COMPONENT.__dataHost.parentComponent.__data.data.playerResponse.adPlacements; } catch (e) { result = null; } return result; }; return _e_x_p_();"
+            adPlacements = WebDriverWait(self.driver, 5).until(lambda driver: driver.execute_script(findScript))
+        except:
+            print("Could not get any adPlacements", sys.exc_info())
+            return None
+            
+        # print(adPlacements)
+        adPlacementData = []
+        for adPlacement in adPlacements:
+            try:
+                adCompanyDomain = adPlacement["adPlacementRenderer"]["renderer"]["instreamVideoAdRenderer"]["playerOverlay"]["instreamAdPlayerOverlayRenderer"]["visitAdvertiserRenderer"]["buttonRenderer"]["text"]["runs"][0]
+                if 'text' in adCompanyDomain:
+                    adPlacementData.append({ "adDomain": adCompanyDomain['text'] })
+            except:
+                print("Could not find ad domain")
+
+        return adPlacementData
