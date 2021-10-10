@@ -57,6 +57,4 @@ class MongoORM(MongoCli):
     def __init__(self, database: str):
         super().__init__(server=MongoORM.server)
         # instantiates connection to database and collection on server
-        # self.database = database
-        # self.collection = collection
         self.connect(db=database)
