@@ -101,7 +101,7 @@ class RecommendedContentBot():
 
         
     def run(self):
-        frequency = 600 
+        frequency = 300 
         runJob(
             frequency,
             self.routine, 

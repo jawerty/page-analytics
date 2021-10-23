@@ -61,15 +61,23 @@ class TopicGenerator():
                 self.seleniumTools.waitForCssSelector(endpoint='ytd-compact-video-renderer', visibility=True)
                 videoLinkSelector = "#items.ytd-watch-next-secondary-results-renderer a.yt-simple-endpoint"
                 videoLinks = self.seleniumTools.driver.find_elements_by_css_selector(videoLinkSelector)
+                allCached = True
                 for videoLink in videoLinks: 
                     href = videoLink.get_attribute('href')
                     print("got href", href)
                     if href in linkCache: # don't go to the same link for a single topic
                         continue
+
+                    allCached = False
                     linkCache.append(href)
 
                     if href:
                         break
+                
+                if allCached:
+                    # just get the topic list so far
+                    return topicList
+
                 print("Going to link", href)
                 self.seleniumTools.driver.get(href)
                 return getTopicArray(topicList, linkCache, i+1)
@@ -81,11 +89,17 @@ class TopicGenerator():
             print("getting topic list for", topic)
             self.seleniumTools.driver.get(f'https://www.youtube.com/results?search_query={topic}')
             self.seleniumTools.waitForCssSelector(endpoint='.ytd-video-renderer', clickable=True)
-            element = self.seleniumTools.driver.find_element_by_css_selector("a#thumbnail")
-            self.seleniumTools.driver.get(element.get_attribute('href'))
-            topicList = getTopicArray([topic.lower()], [], 0)
-            topicLists[topic] = topicList[0:topicListLimit] # may be an excess
-        
+            elements = self.seleniumTools.driver.find_elements_by_css_selector("a#thumbnail")
+            
+            for element in elements:
+                url = element.get_attribute('href')
+                if not url:
+                    continue
+                self.seleniumTools.driver.get(url)
+                topicList = getTopicArray([topic.lower()], [], 0)
+                topicLists[topic] = topicList[0:topicListLimit] # may be an excess
+                break
+
         return topicLists
     
     def saveTopicLists(self, topicLists):
